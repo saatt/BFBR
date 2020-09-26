@@ -5,3 +5,5 @@ weight of sand = 50g, 100g, 150g;
 without biomass;
 without large files (liggghts.restart in DEM);
 
+# fluidizedbedTest_V_DP
+20g sand, without biomass, V vs DP
