@@ -97,10 +97,10 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
-  //      {
-  //          file "flange.extendedFeatureEdgeMesh";
-   //         level 0;
-   //     }
+        {
+            file "CAD.eMesh";
+            level 1;
+        }
     );
 
 
