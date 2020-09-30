@@ -42,18 +42,18 @@ timestep    0.00001
 fix         gravi all gravity 9.81 vector 0.0 0.0 -1.0
 
 #import mesh from cad:(two atom types)
-fix  fb1 all mesh/surface file STL/fluidizedbedriser1.stl type 1 scale 0.0254
-fix  fb2 all mesh/surface file STL/fluidizedbedriser2.stl type 1 scale 0.0254
-fix  fbBioin all mesh/surface file STL/fluidizedbedBioin.stl type 1 scale 0.0254
-fix  fbGasin all mesh/surface file STL/fluidizedbedGasin.stl type 1 scale 0.0254
-fix  fbOut all mesh/surface file STL/fluidizedbedOut.stl type 1 scale 0.0254
+fix  fb1 all mesh/surface file ../DEM/STL/fluidizedbedriser1.stl type 1 scale 0.0254
+fix  fb2 all mesh/surface file ../DEM/STL/fluidizedbedriser2.stl type 1 scale 0.0254
+fix  fbBioin all mesh/surface file ../DEM/STL/fluidizedbedBioin.stl type 1 scale 0.0254
+fix  fbGasin all mesh/surface file ../DEM/STL/fluidizedbedGasin.stl type 1 scale 0.0254
+fix  fbOut all mesh/surface file ../DEM/STL/fluidizedbedOut.stl type 1 scale 0.0254
 
 #import mesh from cad:(three atom types)
-#fix  fb1 all mesh/surface file STL/fluidizedbedriser1.stl type 3 scale 0.0254
-#fix  fb2 all mesh/surface file STL/fluidizedbedriser2.stl type 3 scale 0.0254
-#fix  fbBioin all mesh/surface file STL/fluidizedbedBioin.stl type 3 scale 0.0254
-#fix  fbGasin all mesh/surface file STL/fluidizedbedGasin.stl type 3 scale 0.0254
-#fix fbOut all mesh/surface file STL/fluidizedbedOut.stl type 3 scale 0.0254
+#fix  fb1 all mesh/surface file ../DEM/STL/fluidizedbedriser1.stl type 3 scale 0.0254
+#fix  fb2 all mesh/surface file ../DEM/STL/fluidizedbedriser2.stl type 3 scale 0.0254
+#fix  fbBioin all mesh/surface file ../DEM/STL/fluidizedbedBioin.stl type 3 scale 0.0254
+#fix  fbGasin all mesh/surface file ../DEM/STL/fluidizedbedGasin.stl type 3 scale 0.0254
+#fix fbOut all mesh/surface file ../DEM/STL/fluidizedbedOut.stl type 3 scale 0.0254
 
 #use the imported mesh as granular wall 
 #fix  walls all wall/gran model hertz tangential history rolling_friction epsd2 mesh n_meshes 2 meshes fb fbGasin 
@@ -93,7 +93,7 @@ thermo          100
 thermo_modify   lost ignore norm no
 compute_modify  thermo_temp dynamic yes
 
-dump        dmp all custom/vtk 50000 post/dump*.liggghts_restart.vtk id type x y z vx vy vz fx fy fz f_dragforce[1] f_dragforce[2] f_dragforce[3] radius 
+dump        dmp all custom/vtk 50000 post/dump*.liggghts_restart.vtk id type x y z vx vy vz fx fy fz f_dragforce[1] f_dragforce[2] f_dragforce[3] radius diameter
 
-run 1
+run 0
 
