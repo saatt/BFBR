@@ -61,7 +61,7 @@ region      bc cylinder z 0.0 0.0 0.0235 0.21 0.214 units box
 fix         pts1 all particletemplate/sphere 15485863 atom_type 1 density constant 2670.7 radius constant 0.00025
 fix         pdd1 all particledistribution/discrete 15485867 1 pts1 1.0
 #fix         ins all insert/rate/region seed 32452843 distributiontemplate pdd1 mass 0.02 massrate 0.05 insert_every 1000 overlapcheck yes vel constant 0. 0. -0.1 region bc ntry_mc 10000
-fix             ins all insert/pack seed 32452843 distributiontemplate pdd1 vel constant 0. 0. -0.1 insert_every once overlapcheck yes all_in yes mass_in_region 0.02 region bc
+fix             ins all insert/pack seed 32452843 distributiontemplate pdd1 vel constant 0. 0. -0.1 insert_every once overlapcheck yes all_in yes mass_in_region 0.05 region bc
 
 # apply nve integration to all particles that are inserted as single particles
 fix         integr all nve/sphere
