@@ -21,12 +21,13 @@ readCSV <- function(dir_dta){
   return(b)
 }
 
-##########????????????
-#dir = 'E:/VTK/'
-dir_dta <- "E:/BFBR/BFBR2/BFBR2AtomsNoBiomass_50g_13Umf_restart/CFD/inlet"
+##########µ÷ÓÃº¯Êý
+dir_dta <- "E:/inlet"
+#dir_dta <- "E:/BFBR/BFBR2/BFBR2AtomsNoBiomass_50g_13Umf_restart/CFD/inlet"
 
 result <- readCSV(dir_dta)
-write.csv(result,"E:/BFBR/BFBR2/BFBR2AtomsNoBiomass_50g_13Umf_restart/CFD/inlet/result.csv")
+#write.csv(result,"E:/BFBR/BFBR2/BFBR2AtomsNoBiomass_50g_13Umf_restart/CFD/inlet/result.csv")
+write.csv(result,"E:/inlet/result.csv")
 # Collate result.csv data in Excel
 #write.csv(result,'E:/VTK/result.csv')
 
