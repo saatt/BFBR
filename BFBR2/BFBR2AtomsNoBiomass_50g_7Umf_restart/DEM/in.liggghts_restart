@@ -22,7 +22,8 @@ neigh_modify    delay 0
 # Material properties required for granular pair styles (Two atom types)
 fix         m1 all property/global youngsModulus peratomtype 5e6 5e6
 fix         m2 all property/global poissonsRatio peratomtype 0.3 0.3
-fix         m3 all property/global coefficientRestitution peratomtypepair 2 0.79 0.645 0.645 0.5 
+#fix         m3 all property/global coefficientRestitution peratomtypepair 2 0.79 0.645 0.645 0.5
+fix         m3 all property/global coefficientRestitution peratomtypepair 2 0.2 0.35 0.35 0.5 
 fix         m4 all property/global coefficientFriction peratomtypepair 2 0.45 0.5 0.5 0.55
 fix         m5 all property/global coefficientRollingFriction peratomtypepair 2 0.000016 0.000016 0.000016 0.000016
 

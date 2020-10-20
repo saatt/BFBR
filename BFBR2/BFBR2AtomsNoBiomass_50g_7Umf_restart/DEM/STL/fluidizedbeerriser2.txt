@@ -1,0 +1,7 @@
+//+
+SetFactory("OpenCASCADE");
+Circle(1) = {0, 0, 0, 1, 0, 2*Pi};
+//+
+Translate {0, 0, 17.5} {
+  Curve{1}; 
+}

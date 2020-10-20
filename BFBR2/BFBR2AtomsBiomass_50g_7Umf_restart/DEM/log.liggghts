@@ -1,0 +1,204 @@
+thermo_log      ../DEM/post/thermo.txt
+
+atom_style      granular
+atom_modify     map array
+communicate     single vel yes
+
+boundary        f f f
+newton          off
+
+units           si
+processors      2 2 1
+
+# read the restart file
+read_restart    ../DEM/post/restart/liggghts.restart
+WARNING: Restart file version does not match LIGGGHTS version (../read_restart.cpp:507)
+  orthogonal box = (-0.05 -0.05 -0.01) to (0.05 0.05 0.5)
+  2 by 2 by 1 MPI processor grid
+  286046 atoms
+
+neighbor        0.0005 bin
+neigh_modify    delay 0
+
+
+# Material properties required for granular pair styles
+fix         m1 all property/global youngsModulus peratomtype 5e6 5e6
+fix         m2 all property/global poissonsRatio peratomtype 0.3 0.3
+#fix         m3 all property/global coefficientRestitution peratomtypepair 2 0.79 0.645 0.645 0.5
+fix         m3 all property/global coefficientRestitution peratomtypepair 2 0.2 0.35 0.35 0.5
+fix         m4 all property/global coefficientFriction peratomtypepair 2 0.45 0.5 0.5 0.55
+fix         m5 all property/global coefficientRollingFriction peratomtypepair 2 0.000016 0.000016 0.000016 0.000016
+
+
+# pair style
+pair_style  gran model hertz tangential history # Hertzian without cohesion
+pair_coeff  * *
+
+# timestep, gravity
+timestep    0.00001
+fix         gravi all gravity 9.81 vector 0.0 0.0 -1.0
+
+#import mesh from cad:
+fix  fb1 all mesh/surface file ../DEM/STL/fluidizedbedriser1.stl type 1 scale 0.0254
+INFO: mesh file (../DEM/STL/fluidizedbedriser1.stl) is required, but data will be taken from restart file (../fix_mesh.cpp:417)
+Resetting global state of Fix fb1 Style mesh/surface from restart file info
+fix  fb2 all mesh/surface file ../DEM/STL/fluidizedbedriser2.stl type 1 scale 0.0254
+INFO: mesh file (../DEM/STL/fluidizedbedriser2.stl) is required, but data will be taken from restart file (../fix_mesh.cpp:417)
+Resetting global state of Fix fb2 Style mesh/surface from restart file info
+fix  fbBioin all mesh/surface file ../DEM/STL/fluidizedbedBioin.stl type 1 scale 0.0254
+INFO: mesh file (../DEM/STL/fluidizedbedBioin.stl) is required, but data will be taken from restart file (../fix_mesh.cpp:417)
+Resetting global state of Fix fbBioin Style mesh/surface from restart file info
+fix  fbGasin all mesh/surface file ../DEM/STL/fluidizedbedGasin.stl type 1 scale 0.0254
+INFO: mesh file (../DEM/STL/fluidizedbedGasin.stl) is required, but data will be taken from restart file (../fix_mesh.cpp:417)
+Resetting global state of Fix fbGasin Style mesh/surface from restart file info
+fix  fbOut all mesh/surface file ../DEM/STL/fluidizedbedOut.stl type 1 scale 0.0254
+INFO: mesh file (../DEM/STL/fluidizedbedOut.stl) is required, but data will be taken from restart file (../fix_mesh.cpp:417)
+Resetting global state of Fix fbOut Style mesh/surface from restart file info
+
+#use the imported mesh as granular wall
+#fix  walls all wall/gran model hertz tangential history rolling_friction epsd2 mesh n_meshes 2 meshes fb fbGasin
+fix	walls all wall/gran model hertz tangential history mesh n_meshes 4 meshes fb1 fb2  fbGasin fbBioin
+Resetting global state of Fix n_neighs_mesh_fb1 Style property/atom from restart file info
+Resetting per-atom state of Fix n_neighs_mesh_fb1 Style property/atom from restart file info
+Resetting global state of Fix tracker_fb1 Style contacthistory/mesh from restart file info
+Resetting per-atom state of Fix tracker_fb1 Style contacthistory/mesh from restart file info
+Resetting global state of Fix n_neighs_mesh_fb2 Style property/atom from restart file info
+Resetting per-atom state of Fix n_neighs_mesh_fb2 Style property/atom from restart file info
+Resetting global state of Fix tracker_fb2 Style contacthistory/mesh from restart file info
+Resetting per-atom state of Fix tracker_fb2 Style contacthistory/mesh from restart file info
+Resetting global state of Fix n_neighs_mesh_fbGasin Style property/atom from restart file info
+Resetting per-atom state of Fix n_neighs_mesh_fbGasin Style property/atom from restart file info
+Resetting global state of Fix tracker_fbGasin Style contacthistory/mesh from restart file info
+Resetting per-atom state of Fix tracker_fbGasin Style contacthistory/mesh from restart file info
+Resetting global state of Fix n_neighs_mesh_fbBioin Style property/atom from restart file info
+Resetting per-atom state of Fix n_neighs_mesh_fbBioin Style property/atom from restart file info
+Resetting global state of Fix tracker_fbBioin Style contacthistory/mesh from restart file info
+Resetting per-atom state of Fix tracker_fbBioin Style contacthistory/mesh from restart file info
+
+
+#particle distributions and insertion ### insert biomass
+
+region     bc2 cylinder x 0.0 0.0444 0.0125 0.035 0.038 units box
+fix        pts2 all particletemplate/sphere 49979693 atom_type 2 density constant 294 radius constant 0.0005
+fix        pdd2 all particledistribution/discrete 86028157 1 pts2 1.0
+##fix        ins2 all insert/stream seed 86028121 distributiontemplate pdd2 mass 0.002 massrate 0.0001 insert_every 2000 overlapcheck yes vel constant -0.1 0.0 0.0  insertion_face fbBioin ntry_mc 10000
+##extrude_length 5
+fix        ins2 all insert/rate/region seed 86028121 distributiontemplate pdd2 mass 0.00002 massrate 0.00001 insert_every 1000 overlapcheck yes vel constant -0.01 0.0 0.0 region bc2 ntry_mc 10000
+
+# apply nve integration to all particles that are inserted as single particles
+fix         integr all nve/sphere
+
+# cfd coupling
+fix     cfd all couple/cfd couple_every 100 mpi
+couple_every as specified in LIGGGHTS is overriden by calling external program (../fix_cfd_coupling.cpp:114)
+fix     cfd2 all couple/cfd/force
+
+# apply nve integration to all particles that are inserted as single particles
+fix     integr all nve/sphere
+
+# center of mass
+compute     centerOfMass all com
+
+# compute total dragforce
+compute     dragtotal all reduce sum f_dragforce[1] f_dragforce[2] f_dragforce[3]
+
+# screen output
+ compute         rke all erotate/sphere
+# Define a computation that calculates the rotational kinetic energy of a group of spherical particles. The rotational energy is computed as 1/2Iw^2, where I is the moment of inertia for a sphere and w is # the particle’s angular velocity.
+thermo_style    custom step atoms ke c_rke vol c_centerOfMass[3] c_dragtotal[1] c_dragtotal[2] c_dragtotal[3]
+thermo          100
+thermo_modify   lost ignore norm no
+compute_modify  thermo_temp dynamic yes
+WARNING: Changing thermo_temp compute object. This object is deprecated and will be removed in the future. (../compute.cpp:161)
+
+# dump        dmp all custom/vtk 50000 post/dump*.liggghts_restart.vtk id type x y z vx vy vz fx fy fz f_dragforce[1] f_dragforce[2] f_dragforce[3] radius
+dump        dmp all custom/vtk 1000 post/dump*.liggghts_restart.vtk id type x y z vx vy vz fx fy fz f_dragforce[1] f_dragforce[2] f_dragforce[3] radius diameter
+
+run 0
+Resetting global state of Fix contacthistory Style contacthistory from restart file info
+Resetting per-atom state of Fix contacthistory Style contacthistory from restart file info
+Setting up run at Tue Oct 20 11:45:31 2020
+
+INFO: Particle insertion ins2: 0.649612 particles every 1000 steps - particle rate 64.961201, (mass rate 1.000000e-05)
+      129 particles (mass 1.985801e-05) within 198000 steps
+Memory usage per processor = 136.815 Mbytes
+    Step    Atoms         KinEng            rke         Volume       centerOf       dragtota       dragtota       dragtota 
+  400000   286046  1.0824171e-07  1.9718986e-07         0.0051   0.0073784253              0              0              0 
+Loop time of 3.45707e-06 on 4 procs for 0 steps with 286046 atoms, finish time Tue Oct 20 11:45:34 2020
+
+
+Pair  time (%) = 0 (0)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0 (0)
+Outpt time (%) = 0 (0)
+Other time (%) = 3.45707e-06 (100)
+
+Nlocal:    71511.5 ave 72013 max 70999 min
+Histogram: 1 0 0 0 1 1 0 0 0 1
+Nghost:    9443.75 ave 9477 max 9411 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Neighs:    1.50642e+06 ave 1.51611e+06 max 1.49599e+06 min
+Histogram: 1 0 0 0 1 0 1 0 0 1
+
+Total # of neighbors = 6025676
+Ave neighs/atom = 21.0654
+Neighbor list builds = 0
+Dangerous builds = 0
+
+run 100    
+Setting up run at Tue Oct 20 11:45:35 2020
+
+Memory usage per processor = 136.815 Mbytes
+    Step    Atoms         KinEng            rke         Volume       centerOf       dragtota       dragtota       dragtota 
+  400000   286046  1.0824171e-07  1.9718986e-07         0.0051   0.0073784253              0              0              0 
+WARNING: Particle insertion: Inserting no particle - check particle insertion settings (../fix_insert.cpp:703)
+CFD Coupling established at step 400100
+  400100   286046   1.045992e-07  1.8738119e-07         0.0051   0.0073783391              0              0              0 
+Loop time of 9.58091 on 4 procs for 100 steps with 286046 atoms, finish time Tue Oct 20 11:45:45 2020
+
+
+Pair  time (%) = 7.88772 (82.3275)
+Neigh time (%) = 0.25557 (2.66749)
+Comm  time (%) = 0.114252 (1.19249)
+Outpt time (%) = 0.00381118 (0.0397789)
+Other time (%) = 1.31956 (13.7728)
+
+Nlocal:    71511.5 ave 72013 max 70999 min
+Histogram: 1 0 0 0 1 1 0 0 0 1
+Nghost:    9444 ave 9477 max 9411 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Neighs:    1.50642e+06 ave 1.5161e+06 max 1.49599e+06 min
+Histogram: 1 0 0 0 1 0 1 0 0 1
+
+Total # of neighbors = 6025668
+Ave neighs/atom = 21.0654
+Neighbor list builds = 1
+Dangerous builds = 0
+run 100    
+Setting up run at Tue Oct 20 11:45:52 2020
+
+Memory usage per processor = 136.815 Mbytes
+    Step    Atoms         KinEng            rke         Volume       centerOf       dragtota       dragtota       dragtota 
+  400100   286046   1.045992e-07  1.8738119e-07         0.0051   0.0073783391    1.17845e-06  2.1517542e-07  0.00022764984 
+CFD Coupling established at step 400200
+  400200   286046  1.0457684e-07  1.8530284e-07         0.0051     0.00737815    1.17845e-06  2.1517542e-07  0.00022764984 
+Loop time of 9.282 on 4 procs for 100 steps with 286046 atoms, finish time Tue Oct 20 11:46:02 2020
+
+
+Pair  time (%) = 7.87898 (84.8846)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.109584 (1.18061)
+Outpt time (%) = 0.00356179 (0.0383732)
+Other time (%) = 1.28987 (13.8964)
+
+Nlocal:    71511.5 ave 72016 max 70996 min
+Histogram: 1 0 0 0 1 1 0 0 0 1
+Nghost:    9443.5 ave 9476 max 9413 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Neighs:    1.50638e+06 ave 1.51618e+06 max 1.49583e+06 min
+Histogram: 1 0 0 0 1 0 1 0 0 1
+
+Total # of neighbors = 6025524
+Ave neighs/atom = 21.0649
+Neighbor list builds = 0
+Dangerous builds = 0
