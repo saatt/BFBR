@@ -1,0 +1,6 @@
+wall: patch0  riser1
+wall: patch2  riser2
+
+fbGasin: patch1
+fbBioin: patch3
+fbOut: patch4

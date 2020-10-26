@@ -1,0 +1,12 @@
+cd constant/triSurface
+
+surfaceAutoPatch fb.obj CAD1.obj 120
+
+surfaceConvert -scale 0.0254 CAD1.obj CAD.obj
+surfaceConvert CAD.obj CAD.vtk
+
+surfaceFeatureConvert constant/triSurface/CAD.vtk CAD.eMesh
+
+paraview->vtk
+region (color)
+
